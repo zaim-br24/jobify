@@ -1,7 +1,8 @@
 
 import mongoose from 'mongoose';
 import validator from 'validator';
-
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken';
 
 const UserSchema = new mongoose.Schema({
     name:{
@@ -26,6 +27,7 @@ const UserSchema = new mongoose.Schema({
         required: [true, 'please provide a password'],
         minlength:8,
         maxlength:30,
+        select: false  // the SELET key === false means can't be access if you return it from the DB using 'find' or 'findOne'
     },
     lastName:{
         type: String,
@@ -41,5 +43,25 @@ const UserSchema = new mongoose.Schema({
         
     }
 })
+
+
+// hashing the password
+UserSchema.pre("save", async function(){
+    const user = this;
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(user.password, salt);
+    user.password = hash;
+})
+
+// this function can access to the THIS object which include the User register information
+UserSchema.methods.createJWT = function(){
+    const payload = {
+        userId: this._id,
+        email: this.email
+    }
+   const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: process.env.JWT_LIFETIME})
+   return token
+
+}
 
 export default mongoose.model('User', UserSchema);

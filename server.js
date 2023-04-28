@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config()
 import express  from 'express'
 import 'express-async-errors'
+// import cors from 'cors'
 
 const app = express();
 // DB and authentication
@@ -14,10 +15,13 @@ import authRouter from "./Router/authRouter.js";
 import jobsRouter from './Router/jobsRouter.js'
 
 app.use(express.json())
+// app.use(cors)
 
 app.get('/', (req, res)=>{
-    res.send("Server Running")
+    res.json( {msg: "Welcome!"})
 })
+
+
 
 //routes
 app.use("/api/v1/auth", authRouter );
