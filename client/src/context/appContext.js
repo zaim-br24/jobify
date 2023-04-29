@@ -3,15 +3,19 @@ import { CLEAR_ALERT, DISPLAY_ALERT,REGISTER_USER_BEGIN,REGISTER_USER_SUCCESS,RE
 import reducer from './reducer'
 import axios from 'axios'
 
+const user = localStorage.getItem('user');
+const token = localStorage.getItem('token');
+const userLocation = localStorage.getItem('location')
+
 const initialState = {
     isLoading: false,
     showAlert: false,
     alertText: '',
     alertType: '',
-    user: null,
-    token: null,
-    userLocation: '',
-    jobLocation: ''
+    user: user ? JSON.parse(user) :  null,
+    token: token,
+    userLocation: userLocation || '',
+    jobLocation: userLocation || ''
 
     
 }
@@ -31,13 +35,26 @@ const AppProvider = ({ children }) => {
         },3000)
     }
 
+  const addUserToLocalStorage = ({user, token, location})=>{
+      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('token', token);
+      localStorage.setItem('location', location)
+  }
+  const removeUserFromLocalStorage = ()=>{
+    localStorage.removeItem('user')
+    localStorage.removeItem('token');
+    localStorage.removeItem('location')
+ }
+
     const registerUser = async (currentUser)=>{
       dispatch({type: REGISTER_USER_BEGIN})
     
       try {
         const response = await axios.post('/api/v1/auth/register', currentUser);
-        const {user, token, location} = response.data
-        // console.log(response)
+        let {user, token, location} = response.data
+        // location =  user.location;
+
+        console.log(response)
         displayAlert()
         dispatch({
           type: REGISTER_USER_SUCCESS, 
@@ -45,10 +62,10 @@ const AppProvider = ({ children }) => {
             user,
             token,
             location
-          }
-          //localstorage
-          
-        })} catch (error) {
+          }})
+          //localstorage 
+         addUserToLocalStorage({user, token, location})
+      } catch (error) {
         displayAlert()
         // console.log(error.response)
         dispatch({
@@ -67,7 +84,7 @@ const AppProvider = ({ children }) => {
           ...state,
           displayAlert,
           clearAlert,
-          registerUser
+          registerUser,
         }}
       >
         {children}

@@ -19,7 +19,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   const [values, setValues] = useState(initialState)
-  const {showAlert, displayAlert,  registerUser, isLoading} = useAppContext();
+  const {showAlert, displayAlert,  registerUser, isLoading, addUserToLocalStorage} = useAppContext();
 
 
   const toggelMember = ()=>{

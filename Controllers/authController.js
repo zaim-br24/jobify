@@ -29,9 +29,8 @@ const register = async (req , res, next)=> {
     res.status(StatusCodes.OK).json({user:{
         name:user.name,
         email:user.email,
-        location:user.location,
         lastname:user.lastName
-    }, token})               
+    }, token, location:user.location,})               
     
     
 }
