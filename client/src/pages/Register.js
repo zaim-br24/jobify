@@ -19,7 +19,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   const [values, setValues] = useState(initialState)
-  const {showAlert, displayAlert,  registerUser, isLoading, addUserToLocalStorage} = useAppContext();
+  const {showAlert, displayAlert,  registerUser, loginUser,setupUser, isLoading} = useAppContext();
 
 
   const toggelMember = ()=>{
@@ -40,9 +40,12 @@ export default function Register() {
     const currentUser = {name, email, password};
 
     if(isMember){
-      console.log('already member');
+      // loginUser(currentUser)*
+      setupUser({currentUser, endPoint: "login", alertText:'Login Successful! Redirecting...'})
     }else{
-      registerUser(currentUser)
+      // registerUser(currentUser)
+      setupUser({currentUser, endPoint: "register", alertText:'User Created! Redirecting...'})
+
     }
   }
   useEffect(()=>{

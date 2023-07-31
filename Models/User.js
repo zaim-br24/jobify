@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
         required: [true, 'please provide a password'],
         minlength:8,
         maxlength:30,
-        select: false  // the SELET key === false means can't be access if you return it from the DB using 'find' or 'findOne'
+        select: false  // the SELET key === false means can't be accessed if you return it from the DB using 'find' or 'findOne'
     },
     lastName:{
         type: String,
@@ -48,6 +48,9 @@ const UserSchema = new mongoose.Schema({
 // hashing the password
 UserSchema.pre("save", async function(){
     const user = this;
+    // console.log(this.modifiedPaths())
+    if(!user.isModified("password")) return
+    
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
     user.password = hash;
@@ -63,5 +66,10 @@ UserSchema.methods.createJWT = function(){
    return token
 
 }
+//compare passwords 
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+    const isMatch = await bcrypt.compare(candidatePassword, this.password)
+    return isMatch
+  }
 
 export default mongoose.model('User', UserSchema);

@@ -1,5 +1,21 @@
 import React, { useReducer, useContext} from 'react'
-import { CLEAR_ALERT, DISPLAY_ALERT,REGISTER_USER_BEGIN,REGISTER_USER_SUCCESS,REGISTER_USER_ERROR} from './action'
+import { CLEAR_ALERT,
+   DISPLAY_ALERT,
+   REGISTER_USER_BEGIN,
+   REGISTER_USER_SUCCESS,
+   REGISTER_USER_ERROR,
+   LOGIN_USER_BEGIN,
+   LOGIN_USER_SUCCESS,
+   LOGIN_USER_ERROR,
+   SETUP_USER_BEGIN,
+   SETUP_USER_SUCCESS,
+   SETUP_USER_ERROR,
+   TOGGLE_SIDEBAR,
+   LOGOUT_USER,
+   UPDATE_USER_BEGIN,
+   UPDATE_USER_SUCCESS,
+   UPDATE_USER_ERROR
+  } from './action'
 import reducer from './reducer'
 import axios from 'axios'
 
@@ -15,9 +31,9 @@ const initialState = {
     user: user ? JSON.parse(user) :  null,
     token: token,
     userLocation: userLocation || '',
-    jobLocation: userLocation || ''
+    jobLocation: userLocation || '',
+    showSidebar: false,
 
-    
 }
 
 
@@ -25,6 +41,37 @@ const AppContext = React.createContext()
 
 const AppProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
+
+    const authFetch = axios.create({
+      baseURL: '/api/v1',
+      headers: {
+        Authorization: `Bearer ${state.token}`,
+      },
+    })
+    // response interceptor
+    authFetch.interceptors.request.use(
+      (config) => {
+        // config.headers.common['Authorization'] = `Bearer ${state.token}`
+        return config
+      },
+      (error) => {
+        return Promise.reject(error)
+      }
+    )
+    // response interceptor
+    authFetch.interceptors.response.use(
+      (response) => {
+        return response
+      },
+      (error) => {
+        console.log(error.response)
+        if (error.response.status === 401) {
+          console.log('AUTH ERROR')
+        }
+        return Promise.reject(error)
+      }
+    )
+
     const displayAlert = ()=> {
         dispatch({type: DISPLAY_ALERT})
         clearAlert()
@@ -45,17 +92,15 @@ const AppProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('location')
  }
+//------------------------- REGISTER USER TO FRONTEND ---------------------------------
 
     const registerUser = async (currentUser)=>{
       dispatch({type: REGISTER_USER_BEGIN})
     
       try {
         const response = await axios.post('/api/v1/auth/register', currentUser);
-        let {user, token, location} = response.data
-        // location =  user.location;
+        const {user, token, location} = response.data
 
-        console.log(response)
-        displayAlert()
         dispatch({
           type: REGISTER_USER_SUCCESS, 
           payload:{
@@ -66,8 +111,6 @@ const AppProvider = ({ children }) => {
           //localstorage 
          addUserToLocalStorage({user, token, location})
       } catch (error) {
-        displayAlert()
-        // console.log(error.response)
         dispatch({
           type: REGISTER_USER_ERROR,
           payload:{
@@ -76,8 +119,108 @@ const AppProvider = ({ children }) => {
         })
       }
       clearAlert()
-      console.log(currentUser)
     } 
+//------------------------- LOGIN USER TO FRONTEND ---------------------------------
+
+    const loginUser = async (currentUser)=>{
+      dispatch({type: LOGIN_USER_BEGIN})
+
+      try {
+        const {data} = await axios.post('/api/v1/auth/login', currentUser);
+        const {user, token, location} = data
+
+        console.log(data)
+        dispatch({
+          type: LOGIN_USER_SUCCESS,
+          payload:{
+            user, token, location
+          }
+        })
+        //add {user, token, location} to localStorage
+        addUserToLocalStorage({user, token, location})
+
+      } catch (error) {
+        displayAlert()
+        dispatch({
+          type: LOGIN_USER_ERROR,
+          payload:{
+            msg: error.response.data.msg
+          }
+        })
+      }
+      clearAlert()
+
+    }
+    //---------------------- refactor (login / register) in one function -------------------
+    const setupUser = async ({currentUser, endPoint, alertText})=>{ 
+      dispatch({type: SETUP_USER_BEGIN})
+
+      try {
+        const {data} = await axios.post(`/api/v1/auth/${endPoint}`, currentUser);
+        const {user, token, location} = data
+
+        dispatch({
+          type: SETUP_USER_SUCCESS,
+          payload:{
+            alertText: alertText,
+            user, 
+            token,
+            location
+          }
+        })
+        //add {user, token, location} to localStorage
+        addUserToLocalStorage({user, token, location})
+
+      } catch (error) {
+        displayAlert()
+        dispatch({
+          type: SETUP_USER_ERROR,
+          payload:{
+            msg: error.response.data.msg
+          }
+        })
+      }
+      clearAlert()
+
+    }
+  
+  
+    const updateUser = async (currentUser) => {
+      dispatch({ type: UPDATE_USER_BEGIN })
+
+      try {
+        const { data } = await authFetch.patch('/auth/updateUser', currentUser)
+    
+        // no token
+        const { user, location, token } = data
+    
+        dispatch({
+          type: UPDATE_USER_SUCCESS,
+          payload: { user, location, token },
+        })
+    
+        addUserToLocalStorage({ user, location, token })
+      } catch (error) {
+
+        dispatch({
+          type: UPDATE_USER_ERROR,
+          payload: { msg: error.response.data.msg },
+        })
+      }
+      clearAlert()
+    }  
+    
+    const logoutUser = ()=>{
+      dispatch({type: LOGOUT_USER})
+      removeUserFromLocalStorage()
+    }
+
+ //------------------- toggle sidebar ------------------
+    const toggleSidebar = ()=>{
+      dispatch({type: TOGGLE_SIDEBAR})
+    }
+
+  
     return (
       <AppContext.Provider 
         value={{
@@ -85,6 +228,11 @@ const AppProvider = ({ children }) => {
           displayAlert,
           clearAlert,
           registerUser,
+          loginUser,
+          setupUser,
+          toggleSidebar,
+          logoutUser,
+          updateUser
         }}
       >
         {children}
@@ -94,10 +242,12 @@ const AppProvider = ({ children }) => {
 
 
 
+
 export const useAppContext = ()=>{ 
   return  useContext(AppContext)
 }
 
 export {
-    AppProvider
+    AppProvider,
+    initialState 
 }
