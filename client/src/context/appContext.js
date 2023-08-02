@@ -14,7 +14,12 @@ import { CLEAR_ALERT,
    LOGOUT_USER,
    UPDATE_USER_BEGIN,
    UPDATE_USER_SUCCESS,
-   UPDATE_USER_ERROR
+   UPDATE_USER_ERROR,
+   HANDLE_CHANGE,
+   CLEAR_VALUES,
+   CREATE_JOB_BEGIN,
+   CREATE_JOB_SUCCESS,
+   CREATE_JOB_ERROR
   } from './action'
 import reducer from './reducer'
 import axios from 'axios'
@@ -33,6 +38,15 @@ const initialState = {
     userLocation: userLocation || '',
     jobLocation: userLocation || '',
     showSidebar: false,
+    isEditing: false,
+    editJobId: '',
+    position: '',
+    company: '',
+    // jobLocation
+    jobTypeOptions: ['full-time', 'part-time', 'remote', 'internship'],
+    jobType: 'full-time',
+    statusOptions: ['pending', 'interview', 'declined'],
+    status: 'pending',
 
 }
 
@@ -214,7 +228,34 @@ const AppProvider = ({ children }) => {
       dispatch({type: LOGOUT_USER})
       removeUserFromLocalStorage()
     }
+ // HANDLE CHANHE FOR INPUT
+    const handleChange = ({name, value})=>{
+      dispatch({
+        type: HANDLE_CHANGE,
+        payload: {name, value}
+      })
+    }
 
+    const clearValues = ()=>{
+      dispatch({type: CLEAR_VALUES})
+    }
+
+  // create job
+
+  const createJob  = async ()=>{
+    dispatch({type:CREATE_JOB_BEGIN})
+    try {
+      const {company, position, status, jobType} = state
+      await authFetch.post('/jobs', {company, position, status, jobType})
+      dispatch({type: CREATE_JOB_SUCCESS})
+      // clearing values by calling function instead of clearValues();
+      dispatch({type: CLEAR_VALUES})
+    } catch (error) {
+      if(error.response.status === 401) return
+      dispatch({type: CREATE_JOB_ERROR, payload:{msg: error.response.data.msg}})
+    }
+    clearAlert()
+  }
  //------------------- toggle sidebar ------------------
     const toggleSidebar = ()=>{
       dispatch({type: TOGGLE_SIDEBAR})
@@ -232,7 +273,10 @@ const AppProvider = ({ children }) => {
           setupUser,
           toggleSidebar,
           logoutUser,
-          updateUser
+          updateUser,
+          handleChange,
+          clearValues,
+          createJob
         }}
       >
         {children}
