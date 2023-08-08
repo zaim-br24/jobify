@@ -4,6 +4,7 @@ import Wrapper from '../../assets/wrappers/DashboardFormPage'
 
 export default function AddJob() {
   const {
+    isLoading,
     isEditing,
     showAlert,
     displayAlert,
@@ -16,7 +17,9 @@ export default function AddJob() {
     statusOptions,
     handleChange,
     clearValues,
-    createJob
+    createJob,
+    editJob
+    
   } = useAppContext()
 
   const handleSubmit = (e)=>{
@@ -25,9 +28,10 @@ export default function AddJob() {
        displayAlert()
        return
     }
-    // if(isEditing){
-    //   editJob()
-    // }
+    if(isEditing){
+      editJob()
+      return
+    }
     createJob()
   }
   const handleJobInput = (e)=>{
@@ -54,7 +58,7 @@ export default function AddJob() {
           <FormRowSelect type="text" labelText='Status' name='status' value={status} handleChange={handleJobInput} options={statusOptions}/>
 
           <div className='btn-container'>
-              <button className='btn btn-block submit-btn' type='submit' onClick={handleSubmit}>submit</button>
+              <button className='btn btn-block submit-btn' type='submit' onClick={handleSubmit} disabled={isLoading}>submit</button>
               <button
                 className='btn btn-block clear-btn' 
                 onClick={(e) => {

@@ -15,7 +15,7 @@ const register = async (req , res, next)=> {
     if(userAlreadyExist) {
         const firstLetter = email[0];
         const restOfEmail = email.slice(email.length - 10)
-        throw new BadRequestError(`${firstLetter +'*****'+ restOfEmail} email already in use.`)
+        throw new BadRequestError(`${firstLetter +'*****'+ restOfEmail} email already in use.`)        
     }
     //create a user
     const  user =  await Users.create({

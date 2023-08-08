@@ -22,7 +22,7 @@ const Wrapper = styled.article`
     height: 60px;
     display: grid;
     place-items: center;
-    background: var(--primary-500);
+    /* background: var(--primary-500); */
     border-radius: var(--borderRadius);
     font-size: 1.5rem;
     font-weight: 700;
@@ -61,10 +61,10 @@ const Wrapper = styled.article`
     grid-template-columns: 1fr;
     row-gap: 0.5rem;
     @media (min-width: 576px) {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr ;
     }
     @media (min-width: 992px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr ;
     }
     @media (min-width: 1120px) {
       grid-template-columns: 1fr 1fr;

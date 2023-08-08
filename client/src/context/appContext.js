@@ -19,7 +19,17 @@ import { CLEAR_ALERT,
    CLEAR_VALUES,
    CREATE_JOB_BEGIN,
    CREATE_JOB_SUCCESS,
-   CREATE_JOB_ERROR
+   CREATE_JOB_ERROR,
+   GET_JOBS_BEGIN,
+   GET_JOBS_SUCCESS,
+   SET_EDIT_JOB,
+   EDIT_JOB_BEGIN,
+   EDIT_JOB_SUCCESS,
+   EDIT_JOB_ERROR,
+   DELETE_JOB_BEGIN,
+   SHOW_STATS_BEGIN,
+   SHOW_STATS_SUCCESS
+
   } from './action'
 import reducer from './reducer'
 import axios from 'axios'
@@ -47,6 +57,12 @@ const initialState = {
     jobType: 'full-time',
     statusOptions: ['pending', 'interview', 'declined'],
     status: 'pending',
+    jobs: [],
+    totalJobs: 0,
+    numOfPages: 1,
+    page: 1,
+    stats:[],
+    monthlyApplications: []
 
 }
 
@@ -248,7 +264,7 @@ const AppProvider = ({ children }) => {
       const {company, position, status, jobType} = state
       await authFetch.post('/jobs', {company, position, status, jobType})
       dispatch({type: CREATE_JOB_SUCCESS})
-      // clearing values by calling function instead of clearValues();
+      // clearing values by calling function instead of clearValues(); (it's the same)
       dispatch({type: CLEAR_VALUES})
     } catch (error) {
       if(error.response.status === 401) return
@@ -256,6 +272,88 @@ const AppProvider = ({ children }) => {
     }
     clearAlert()
   }
+
+  // getJobs
+  const getJobs = async ()=>{
+    dispatch({type: GET_JOBS_BEGIN})
+    try {
+      const {data} = await authFetch('/jobs');
+      const { jobs, totalJobs, numOfPages } = data
+      dispatch({
+        type: GET_JOBS_SUCCESS,
+        payload:{
+          jobs,
+          totalJobs,
+          numOfPages
+        }
+      })
+    } catch (error) {
+      console.log(error.response);
+      // logoutUser()
+    }
+  }
+  const setEditJob = (id) => {
+    dispatch({type: SET_EDIT_JOB , payload:{id}})
+  }
+  //Edit JOB
+  const editJob = async () => {
+    dispatch({ type: EDIT_JOB_BEGIN })
+    try {
+      const { position, company, jobLocation, jobType, status } = state
+  
+      await authFetch.patch(`/jobs/${state.editJobId}`, {
+        company,
+        position,
+        jobLocation,
+        jobType,
+        status,
+      })
+      dispatch({
+        type: EDIT_JOB_SUCCESS,
+      })
+      dispatch({ type: CLEAR_VALUES })
+    } catch (error) {
+      if (error.response.status === 401) return
+      dispatch({
+        type: EDIT_JOB_ERROR,
+        payload: { msg: error.response.data.msg },
+      })
+    }
+    clearAlert()
+  }
+
+  // Delete JOB
+  const deleteJob = async (jobId) => {
+    dispatch({ type: DELETE_JOB_BEGIN })
+    try {
+      await authFetch.delete(`/jobs/${jobId}`)
+      getJobs() // we have re fetch jobs from database because we deleted from it.
+    } catch (error) {
+      logoutUser()
+    }
+  }
+ 
+  const showStats = async ()=>{
+    dispatch({type: SHOW_STATS_BEGIN})
+    try {
+      const {data} = await authFetch('/jobs/stats')
+
+      dispatch({
+        type: SHOW_STATS_SUCCESS,
+        payload:{
+          stats: data.defaultStats,
+          monthlyApplications: data.monthlyApplications
+        }
+      })
+      
+    } catch (error) {
+      console.log(error)
+
+      // logoutUser();
+    }
+    clearAlert()
+  }
+  
  //------------------- toggle sidebar ------------------
     const toggleSidebar = ()=>{
       dispatch({type: TOGGLE_SIDEBAR})
@@ -276,7 +374,12 @@ const AppProvider = ({ children }) => {
           updateUser,
           handleChange,
           clearValues,
-          createJob
+          createJob,
+          getJobs,
+          setEditJob,
+          editJob,
+          deleteJob,
+          showStats
         }}
       >
         {children}
