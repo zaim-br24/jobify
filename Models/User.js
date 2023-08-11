@@ -62,7 +62,7 @@ UserSchema.methods.createJWT = function(){
         userId: this._id,
         email: this.email
     }
-   const token = jwt.sign({  userId: this._id}, ''+ process.env.JWT_SECRET, {expiresIn: process.env.JWT_LIFETIME})
+   const token = jwt.sign(payload, ''+ process.env.JWT_SECRET, {expiresIn: process.env.JWT_LIFETIME})
    return token
 
 }
