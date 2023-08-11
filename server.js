@@ -4,6 +4,16 @@ import express  from 'express'
 import 'express-async-errors'
 import morgan from "morgan";
 // import cors from 'cors'
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import path from 'path'
+// security
+import helmet from 'helmet'
+import xss from 'xss-clean'
+import mongoSanitize from 'express-mongo-sanitize'
+
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const app = express();
 // DB and authentication
@@ -20,18 +30,20 @@ if(process.env.NODE_ENV !== 'production'){
     app.use(morgan('dev'))
 }
 app.use(express.json())
+app.use(helmet()) //secure headers
+app.use(xss()) //Sanitize the inputs (prevent cross-site-scripting)
+app.use(mongoSanitize())// prevent mongoDB injections 
 // app.use(cors)
-
-app.get('/', (req, res)=>{
-    res.json( {msg: "Welcome!"})
-})
-
-
+// only when ready to deploy
+app.use(express.static(path.resolve(__dirname, './client/build')))
 
 //routes
 app.use("/api/v1/auth", authRouter );
 app.use("/api/v1/jobs",authenticateUser, jobsRouter );
 
+app.get('*', function (request, response) {
+    response.sendFile(path.resolve(__dirname, './client/build', 'index.html'))
+  })
 app.use(notFoundMiddleware )
 app.use(errorHandlerMiddleware)
 
