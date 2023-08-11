@@ -110,6 +110,7 @@ const updateJob = async (req, res)=>{
 }
 
 const showStats = async(req, res)=>{
+
   let stats = await Job.aggregate([
     {$match: {createdBy: mongoose.Types.ObjectId(req.user.userId)}}, //we get all the jobs of a user
     {$group: {_id:"$status", count: {$sum : 1}}}, // we group the status  { _id: "declined", count: 23} , (pending, interview )
