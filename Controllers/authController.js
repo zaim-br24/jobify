@@ -1,6 +1,6 @@
 import Users from '../Models/User.js'
 import { StatusCodes } from 'http-status-codes'
-import {BadRequestError, UnauthenticatedError} from '../errors/index.js'
+import {BadRequestError, UnauthenticatedError} from '../Errors/index.js'
 
 
 
