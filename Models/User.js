@@ -58,11 +58,11 @@ UserSchema.pre("save", async function(){
 
 // this function can access to the THIS object which include the User register information
 UserSchema.methods.createJWT = function(){
-    const payload = {
-        userId: this._id,
-        email: this.email
-    }
-   const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: process.env.JWT_LIFETIME})
+    // const payload = {
+    //     userId: this._id,
+    //     email: this.email
+    // }
+   const token = jwt.sign({ userId: this._id}, { secret: `${process.env.JWT_SECRET}` }, {expiresIn: process.env.JWT_LIFETIME})
    return token
 
 }
