@@ -37,8 +37,45 @@ const createJob = async (req, res) => {
   }
 
 const getAllJobs = async (req, res)=>{
-    const jobs = await Job.find({createdBy:req.user.userId})
-    res.status(StatusCodes.OK).json({jobs, totalJobs: jobs.length , numOfPages: 1})
+  const {status, jobType, sort, search} = req.query
+
+    const queryObject = {
+      createdBy:req.user.userId
+    }
+    
+    // filter
+    if(status !== 'all'){ queryObject.status = status}
+    if(jobType !== 'all'){ queryObject.jobType = jobType}
+    if(search){
+      queryObject.position = {$regex: search, $options:'i'} //i => case sensitive
+    }
+    let result = Job.find(queryObject);
+    // chain sort conditions
+    if (sort === 'latest') {
+      result = result.sort('-createdAt')
+    }
+    if (sort === 'oldest') {
+      result = result.sort('createdAt')
+    }
+    if (sort === 'a-z') {
+      result = result.sort('position')
+    }
+    if (sort === 'z-a') {
+      result = result.sort('-position')
+    }
+      // setup pagination
+  const page = Number(req.query.page) || 1
+  const limit = Number(req.query.limit) || 10
+  const skip = (page - 1) * limit //10
+  result = result.skip(skip).limit(limit)
+  // 75
+  // 10 10 10 10 10 10 10 5
+    const totalJobs = await Job.countDocuments(queryObject);
+    const numOfPages = Math.ceil(totalJobs / limit)
+    const jobs = await result 
+
+    // DONOT USE AWAIT SO THAT WE CAN ADD THE CONDITIONS FIRST
+    res.status(StatusCodes.OK).json({jobs, totalJobs, numOfPages})
 }
 const updateJob = async (req, res)=>{
     const {id: jobId} = req.params
@@ -79,7 +116,6 @@ const showStats = async(req, res)=>{
   ])
  
   stats = stats.reduce((acc , curr)=>{  //   { 'interview': 25, 'pending': 13, 'declined': 20}
-
     const {_id: title, count} = curr;
     acc[title]= count
     return acc

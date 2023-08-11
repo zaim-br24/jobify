@@ -28,7 +28,8 @@ import {
     EDIT_JOB_ERROR,
     DELETE_JOB_BEGIN,
     SHOW_STATS_BEGIN,
-    SHOW_STATS_SUCCESS
+    SHOW_STATS_SUCCESS,
+    CHANGE_PAGE
 } 
 from "./action";
 import { initialState } from './appContext'
@@ -278,6 +279,9 @@ const reducer = (state , action)=>{
           stats: action.payload.stats,
           monthlyApplications: action.payload.monthlyApplications ,
         }
+      }
+      if (action.type === CHANGE_PAGE) {
+        return { ...state, page: action.payload.page }
       }
 }
 

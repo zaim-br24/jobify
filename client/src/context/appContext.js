@@ -28,7 +28,8 @@ import { CLEAR_ALERT,
    EDIT_JOB_ERROR,
    DELETE_JOB_BEGIN,
    SHOW_STATS_BEGIN,
-   SHOW_STATS_SUCCESS
+   SHOW_STATS_SUCCESS,
+   CHANGE_PAGE
 
   } from './action'
 import reducer from './reducer'
@@ -62,7 +63,12 @@ const initialState = {
     numOfPages: 1,
     page: 1,
     stats:[],
-    monthlyApplications: []
+    monthlyApplications: [],
+    search: '',
+    searchStatus: 'all',
+    searchType: 'all',
+    sort: 'latest',
+    sortOptions: ['latest', 'oldest', 'a-z', 'z-a'],
 
 }
 
@@ -275,9 +281,14 @@ const AppProvider = ({ children }) => {
 
   // getJobs
   const getJobs = async ()=>{
+    const { search, searchStatus, searchType, sort , page} = state
+    let url = `/jobs?page=${page}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`
+    if (search) {
+      url = url + `&search=${search}`
+    }
     dispatch({type: GET_JOBS_BEGIN})
     try {
-      const {data} = await authFetch('/jobs');
+      const {data} = await authFetch(url);
       const { jobs, totalJobs, numOfPages } = data
       dispatch({
         type: GET_JOBS_SUCCESS,
@@ -288,8 +299,7 @@ const AppProvider = ({ children }) => {
         }
       })
     } catch (error) {
-      console.log(error.response);
-      // logoutUser()
+      logoutUser()
     }
   }
   const setEditJob = (id) => {
@@ -347,13 +357,18 @@ const AppProvider = ({ children }) => {
       })
       
     } catch (error) {
-      console.log(error)
-
-      // logoutUser();
+      logoutUser();
     }
     clearAlert()
   }
-  
+  // change page
+  const changePage = (page) => {
+    dispatch({ type: CHANGE_PAGE, payload: { page } })
+  }
+  // clear filter
+  const clearFilters = ()=>{
+    console.log('filter cleared')
+  }
  //------------------- toggle sidebar ------------------
     const toggleSidebar = ()=>{
       dispatch({type: TOGGLE_SIDEBAR})
@@ -379,7 +394,9 @@ const AppProvider = ({ children }) => {
           setEditJob,
           editJob,
           deleteJob,
-          showStats
+          showStats,
+          clearFilters,
+          changePage
         }}
       >
         {children}
