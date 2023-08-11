@@ -1,4 +1,4 @@
-import { UnAuthorizedError } from '../errors/index.js'
+import { UnAuthorizedError } from '../Errors/index.js'
 
 const checkPermissions = (requestUser, resourceUserId) => {
   // if (requestUser.role === 'admin') return
