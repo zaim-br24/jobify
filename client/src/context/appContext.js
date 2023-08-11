@@ -80,14 +80,14 @@ const AppProvider = ({ children }) => {
 
     const authFetch = axios.create({
       baseURL: '/api/v1',
-      // headers: {
-      //   Authorization: `Bearer ${state.token}`,
-      // },
+      headers: {
+        Authorization: `Bearer ${state.token}`,
+      },
     })
     // response interceptor
     authFetch.interceptors.request.use(
       (config) => {
-        config.headers.common['Authorization'] = `Bearer ${state.token}`
+        // config.headers.common['Authorization'] = `Bearer ${state.token}`
         return config
       },
       (error) => {
@@ -100,9 +100,9 @@ const AppProvider = ({ children }) => {
         return response
       },
       (error) => {
-        console.log(error.response)
         if (error.response.status === 401) {
-          console.log('AUTH ERROR')
+          // console.log('AUTH ERROR')
+          logoutUser()
         }
         return Promise.reject(error)
       }
@@ -165,7 +165,6 @@ const AppProvider = ({ children }) => {
         const {data} = await axios.post('/api/v1/auth/login', currentUser);
         const {user, token, location} = data
 
-        console.log(data)
         dispatch({
           type: LOGIN_USER_SUCCESS,
           payload:{
@@ -357,8 +356,11 @@ const AppProvider = ({ children }) => {
       })
       
     } catch (error) {
-      logoutUser();
-    }
+      
+    if (error.response.status === 401) {
+            logoutUser()
+        }    
+      }
     clearAlert()
   }
   // change page
