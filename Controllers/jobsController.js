@@ -1,6 +1,6 @@
 import Job from '../Models/Job.js'
 import { StatusCodes } from 'http-status-codes'
-import { BadRequestError, NotFoundError } from '../errors/index.js'
+import { BadRequestError, NotFoundError } from '../Errors/index.js'
 import checkPermissions from '../utils/checkPremissions.js'
 import mongoose from 'mongoose'
 import moment from 'moment'
