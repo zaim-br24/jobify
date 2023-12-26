@@ -34,7 +34,7 @@ import { CLEAR_ALERT,
   } from './action'
 import reducer from './reducer'
 import axios from 'axios'
-
+import {_apiurl} from '../utils/index'
 const user = localStorage.getItem('user');
 const token = localStorage.getItem('token');
 const userLocation = localStorage.getItem('location')
@@ -79,15 +79,15 @@ const AppProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState)
 
     const authFetch = axios.create({
-      baseURL: '/api/v1',
-      headers: {
-        Authorization: `Bearer ${state.token}`,
-      },
-    })
+      baseURL: `${_apiurl}/api/v1`,
+      // headers: {
+      //   Authorization: `Bearer ${state.token}`,
+      // },
+    });
     // response interceptor
     authFetch.interceptors.request.use(
       (config) => {
-        // config.headers.common['Authorization'] = `Bearer ${state.token}`
+        config.headers.Authorization = `Bearer ${state.token}`;
         return config
       },
       (error) => {
@@ -134,7 +134,10 @@ const AppProvider = ({ children }) => {
       dispatch({type: REGISTER_USER_BEGIN})
     
       try {
-        const response = await axios.post('/api/v1/auth/register', currentUser);
+        const response = await axios.post(
+          `${_apiurl}/api/v1/auth/register`,
+          currentUser
+        );
         const {user, token, location} = response.data
 
         dispatch({
@@ -162,7 +165,10 @@ const AppProvider = ({ children }) => {
       dispatch({type: LOGIN_USER_BEGIN})
 
       try {
-        const {data} = await axios.post('/api/v1/auth/login', currentUser);
+        const { data } = await axios.post(
+          `${_apiurl}/api/v1/auth/login`,
+          currentUser
+        );
         const {user, token, location} = data
 
         dispatch({
@@ -191,7 +197,7 @@ const AppProvider = ({ children }) => {
       dispatch({type: SETUP_USER_BEGIN})
 
       try {
-        const {data} = await axios.post(`/api/v1/auth/${endPoint}`, currentUser);
+        const {data} = await axios.post(`${_apiurl}/api/v1/auth/${endPoint}`, currentUser);
         const {user, token, location} = data
 
         dispatch({
