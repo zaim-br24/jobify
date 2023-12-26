@@ -18,7 +18,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express();
 // DB and authentication
 import connectDB from "./db/connect.js";
-
 // Middleware
 import notFoundMiddleware from './middleware/not-found.js'
 import errorHandlerMiddleware from './middleware/error-handler.js'
@@ -33,7 +32,8 @@ app.use(express.json())
 app.use(helmet()) //secure headers
 app.use(xss()) //Sanitize the inputs (prevent cross-site-scripting)
 app.use(mongoSanitize())// prevent mongoDB injections 
-// app.use(cors)
+app.set("trust proxy", 1);
+app.use(cors())
 // only when ready to deploy
 app.use(express.static(path.resolve(__dirname, '../client/build')))
 //routes
