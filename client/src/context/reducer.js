@@ -285,4 +285,6 @@ const reducer = (state , action)=>{
       }
 }
 
-export default reducer;
+
+
+export default reducer

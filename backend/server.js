@@ -3,7 +3,7 @@ dotenv.config()
 import express  from 'express'
 import 'express-async-errors'
 import morgan from "morgan";
-// import cors from 'cors'
+import cors from 'cors'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import path from 'path'
@@ -35,21 +35,24 @@ app.use(xss()) //Sanitize the inputs (prevent cross-site-scripting)
 app.use(mongoSanitize())// prevent mongoDB injections 
 // app.use(cors)
 // only when ready to deploy
-app.use(express.static(path.resolve(__dirname, './client/build')))
-
+app.use(express.static(path.resolve(__dirname, '../client/build')))
 //routes
 app.use("/api/v1/auth", authRouter );
 app.use("/api/v1/jobs",authenticateUser, jobsRouter );
 
-app.get('*', function (request, response) {
-    response.sendFile(path.resolve(__dirname, './client/build', 'index.html'))
-  })
+// app.get('*', function (request, response) {
+//     response.sendFile(path.resolve(__dirname, '../client/build', 'index.html'))
+// })
+app.get("/", function (request, response) {
+    response.send("Hello world")
+});
+  
 app.use(notFoundMiddleware )
 app.use(errorHandlerMiddleware)
 
 
 // server listening
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 4000
 const start = async ()=>{
     try {
         await connectDB(process.env.DB_URL, process.env.DB_PASSWORD)

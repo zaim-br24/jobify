@@ -19,7 +19,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   const [values, setValues] = useState(initialState)
-  const {showAlert, displayAlert,  registerUser, loginUser,setupUser, isLoading} = useAppContext();
+  const {showAlert, displayAlert,  registerUser, loginUser,setupUser, 	isLoading} = useAppContext();
 
 
   const toggelMember = ()=>{
@@ -57,45 +57,52 @@ export default function Register() {
     }
   },[user, navigate])
   return (
-    <Wrapper className='full-page'>
-        <form className='form' onSubmit={onSubmit}>
-            <Logo/>
-            <h3>{values.isMember? "Login" : "Register"}</h3>
-            {showAlert && <Alert/>}
+    <Wrapper className="full-page">
+      <form className="form" onSubmit={onSubmit}>
+        <Logo />
+        <h3>{values.isMember ? "Login" : "Register"}</h3>
+        {showAlert && <Alert />}
 
-            { !values.isMember &&  
-              <FormRow 
-                type={"name"}
-                handleChange = {handleChange}
-                name = 'name'
-                value = {values.name}
-
-              />}
-            <FormRow 
-              type={"email"}
-              handleChange = {handleChange}
-              name = 'email'
-              value = {values.email}
-
-            />
-            <FormRow 
-              type={"password"}
-              handleChange = {handleChange}
-              name = 'password'
-              value = {values.password}
-
-             />
-            <button type='submit' className='btn btn-block' disabled={isLoading}>
-              submit
-            </button>
-
+        {!values.isMember && (
+          <FormRow
+            type={"name"}
+            handleChange={handleChange}
+            name="name"
+            value={values.name}
+          />
+        )}
+        <FormRow
+          type={"email"}
+          handleChange={handleChange}
+          name="email"
+          value={values.email}
+        />
+        <FormRow
+          type={"password"}
+          handleChange={handleChange}
+          name="password"
+          value={values.password}
+        />
+        <button type="submit" className="btn btn-block" disabled={isLoading}>
+          submit
+        </button>
+        <div>
+          <p>Demo</p>
           <p>
-            {values.isMember? "not register yet" : "already member?"}
-            <button type='button' onClick={toggelMember} className='member-btn'>
-              {values.isMember? "register" : 'login'}
-            </button>
+            email : <span>demo@gmail.com</span>
           </p>
-        </form>
+          <p>
+            password : <span>adminadmin</span>
+          </p>
+        </div>
+
+        <p>
+          {values.isMember ? "not register yet" : "already member?"}
+          <button type="button" onClick={toggelMember} className="member-btn">
+            {values.isMember ? "register" : "login"}
+          </button>
+        </p>
+      </form>
     </Wrapper>
-  )
+  );
 }
