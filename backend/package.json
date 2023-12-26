@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 {
   "name": "jobify",
   "version": "1.0.0",
@@ -43,4 +41,3 @@
     "node": "20.x"
   }
 }
->>>>>>> b3479d1 (fixing problems commit)
